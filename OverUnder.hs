@@ -34,6 +34,8 @@ type Player = Game -> Result -> AMove
 
 overunder :: Game
 overunder (Move move (myscore, theirscore, (previous_card, the_deck)))
+    -- (chosen, remaining) <- choose_card the_deck
+    -- | chosen move previous_card             = EndOfGame 1      -- agent wins
     | length deck  == 0                 = EndOfGame 0      -- the deck is empty, draw
     | otherwise
          overunder_helper (Move move (myscore, theirscore, (previous_card, new_deck))) chosen_card
@@ -43,11 +45,14 @@ overunder (Move move (myscore, theirscore, (previous_card, the_deck)))
 overunder_helper (Move move (myscore, theirscore, (previous_card, the_deck))) chosen_card
     | myscore == 5                      = EndOfGame 1      -- agent wins
     | otherwise                         =
-          ContinueGame (others, move:mine)
-                 [act | act <- [1..9], not (act `elem` move:mine++others)]
-
+          ContinueGame (theirscore, (update_score move previous_card chosen_card myscore), (chosen_card, the_deck))
 
 overunder Start = ContinueGame (0, 0, (choose_card (allCardValues++allCardValues++allCardValues++allCardValues)))
+
+update_score :: Int
+update_score move previous current score =
+  | current move previous = score+1
+  | otherwise = score
 
 -- TODO: make choose_card be random! for now just choosing the first card in the list!
 choose_card h:t = (h, t)
