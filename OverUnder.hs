@@ -14,6 +14,7 @@ allCardValues = [minBound..maxBound] :: [CardValue]
 type Score = Int -- Score = 
 
 data AMove = Over | Under | Same
+  deriving (Eq)
 -- type AMove = Int                  -- a move for a player
 -- type State = ([AMove], [AMove])   -- (mine,other's)
 
@@ -23,7 +24,7 @@ data Action = Move AMove State   -- do AMove in State
             | Start              -- returns starting state
 
 data Result = EndOfGame Int        -- end of game
-            | ContinueGame State [AMove]   -- continue with new state, and list of possible moves
+            | ContinueGame State   -- continue with new state
          deriving (Eq, Show)
 
 type Game = Action -> Result
@@ -31,36 +32,41 @@ type Game = Action -> Result
 type Player = Game -> Result -> AMove
 
 ------ The Over Under Game -------
-
 overunder :: Game
+overunder Start = ContinueGame (0, 0, (choose_card (allCardValues++allCardValues++allCardValues++allCardValues)))
 overunder (Move move (myscore, theirscore, (previous_card, the_deck)))
-    -- (chosen, remaining) <- choose_card the_deck
-    -- | chosen move previous_card             = EndOfGame 1      -- agent wins
-    | length deck  == 0                 = EndOfGame 0      -- the deck is empty, draw
-    | otherwise
+    | length the_deck  == 0                 = EndOfGame 0      -- the deck is empty, draw
+    | otherwise =
          overunder_helper (Move move (myscore, theirscore, (previous_card, new_deck))) chosen_card
-    where
-       (chosen_card, new_deck) = choose_card the_deck
+         where
+            (chosen_card, new_deck) = choose_card the_deck
 
 overunder_helper (Move move (myscore, theirscore, (previous_card, the_deck))) chosen_card
-    | myscore == 5                      = EndOfGame 1      -- agent wins
+    | new_score == 5                    = EndOfGame 1      -- agent wins
     | otherwise                         =
-          ContinueGame (theirscore, (update_score move previous_card chosen_card myscore), (chosen_card, the_deck))
+          ContinueGame (theirscore, new_score, (chosen_card, the_deck))
+          where 
+              new_score = (update_score move previous_card chosen_card myscore)
 
-overunder Start = ContinueGame (0, 0, (choose_card (allCardValues++allCardValues++allCardValues++allCardValues)))
 
-update_score :: Int
-update_score move previous current score =
-  | current move previous = score+1
+-- updates the score based on move made, previous card, current card, and current score
+update_score Over previous current score
+  | current > previous = score + 1
+  | otherwise = score
+update_score Under previous current score
+  | current < previous = score + 1
+  | otherwise = score
+update_score Same previous current score
+  | current == previous = score + 1
   | otherwise = score
 
 -- TODO: make choose_card be random! for now just choosing the first card in the list!
-choose_card h:t = (h, t)
+choose_card (h:t) = (h, t)
 
 ------- A Player -------
 simple_player :: Player
 -- this player has an ordering of the moves, and chooses the fist one available
-simple_player _ (ContinueGame _ avail) = head [e | e <- [5,6,4,2,8,1,3,7,9], e `elem` avail]
+simple_player _ (ContinueGame (_, _, (_, remaining))) = Over
 
 
 -- Test cases
