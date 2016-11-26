@@ -5,8 +5,19 @@ module OverUnder where
 -- ghci
 -- :load OverUnder
 
-type AMove = Int                  -- a move for a player
-type State = ([AMove], [AMove])   -- (mine,other's)
+data CardValue = Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King | Ace
+  deriving (Eq,Ord,Enum,Bounded,Show,Read)
+
+allCardValues = [minBound..maxBound] :: [CardValue]
+
+-- state our score, their score, last chosen card
+type Score = Int -- Score = 
+
+data AMove = Over | Under | Same
+-- type AMove = Int                  -- a move for a player
+-- type State = ([AMove], [AMove])   -- (mine,other's)
+
+type State = (Score, Score, (CardValue, [CardValue])) -- my score, their score, previously chosen card value, remaining cards
 
 data Action = Move AMove State   -- do AMove in State
             | Start              -- returns starting state
@@ -19,23 +30,22 @@ type Game = Action -> Result
 
 type Player = Game -> Result -> AMove
 
------- The Magic Sum Game -------
+------ The Over Under Game -------
 
 overunder :: Game
-overunder (Move move (mine, others))
-    | win move mine                     = EndOfGame 1      -- agent wins
-    | length mine + length others == 8  = EndOfGame 0      -- no more moves, draw
+overunder (Move move (myscore, theirscore, (previous_card, the_deck)))
+    | myscore == 5                      = EndOfGame 1      -- agent wins
+    | length deck  == 0                 = EndOfGame 0      -- the deck is empty, draw
     | otherwise                         =
           ContinueGame (others, move:mine)
                  [act | act <- [1..9], not (act `elem` move:mine++others)]
 
-overunder Start = ContinueGame ([],[]) [1..9]
+overunder Start = ContinueGame (0, 0, (choose_card (allCardValues++allCardValues++allCardValues++allCardValues)))
 
--- win n ns = the agent wins if it selects n given it has already selected ns
-win n ns  = or [n+x+y==15 | x <- ns, y <- ns, x/=y]
+-- TODO: make choose_card be random! for now just choosing the first card in the list!
+choose_card h:t = (h, t)
 
 ------- A Player -------
-
 simple_player :: Player
 -- this player has an ordering of the moves, and chooses the fist one available
 simple_player _ (ContinueGame _ avail) = head [e | e <- [5,6,4,2,8,1,3,7,9], e `elem` avail]
