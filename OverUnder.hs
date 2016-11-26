@@ -34,11 +34,18 @@ type Player = Game -> Result -> AMove
 
 overunder :: Game
 overunder (Move move (myscore, theirscore, (previous_card, the_deck)))
-    | myscore == 5                      = EndOfGame 1      -- agent wins
     | length deck  == 0                 = EndOfGame 0      -- the deck is empty, draw
+    | otherwise
+         overunder_helper (Move move (myscore, theirscore, (previous_card, new_deck))) chosen_card
+    where
+       (chosen_card, new_deck) = choose_card the_deck
+
+overunder_helper (Move move (myscore, theirscore, (previous_card, the_deck))) chosen_card
+    | myscore == 5                      = EndOfGame 1      -- agent wins
     | otherwise                         =
           ContinueGame (others, move:mine)
                  [act | act <- [1..9], not (act `elem` move:mine++others)]
+
 
 overunder Start = ContinueGame (0, 0, (choose_card (allCardValues++allCardValues++allCardValues++allCardValues)))
 
