@@ -1,3 +1,8 @@
+INSTRUCTIONS FOR DOWNLOADING RANDOM:
+run the following command in Terminal
+$ cabal install random
+
+
 The following is a simplified version where the player always plays first.
 
 Game starts with the following state:
