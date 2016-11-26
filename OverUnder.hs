@@ -14,7 +14,7 @@ allCardValues = [minBound..maxBound] :: [CardValue]
 type Score = Int -- Score = 
 
 data AMove = Over | Under | Same
-  deriving (Eq)
+  deriving (Eq, Show, Read)
 -- type AMove = Int                  -- a move for a player
 -- type State = ([AMove], [AMove])   -- (mine,other's)
 
@@ -65,7 +65,6 @@ choose_card (h:t) = (h, t)
 
 ------- A Player -------
 simple_player :: Player
--- this player has an ordering of the moves, and chooses the fist one available
 simple_player _ (ContinueGame (_, _, (_, remaining))) = Over
 
 

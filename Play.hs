@@ -5,12 +5,10 @@ module Play where
 -- ghci
 -- :load Play
 
-import MagicSum
-import Minimax
 import System.IO
+import OverUnder
 
 type TournammentState = (Int,Int,Int)   -- wins, losses, ties
-
 
 play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
 
@@ -39,12 +37,11 @@ person_play game (EndOfGame 0) opponent (wins,losses,ties) =
    do
       putStrLn "I't a draw"
       play game (game Start) opponent (wins,losses,ties+1)
-person_play game (ContinueGame state avail) opponent tournament_state =
+person_play game (ContinueGame (s1, s2, (card, deck))) opponent tournament_state =
    do
-      putStrLn ("State is "++show state++" choose one of "++show avail)
+      putStrLn ("Previous card is "++show card++". Score is player: "++show s1++ ", computer: "++show s2++" Choose one of Over, Under, Same")
       line <- getLine
-      computer_play game (game (Move (read line :: AMove) state)) opponent tournament_state
-
+      computer_play game (game (Move (read line :: AMove) (s1, s2, (card, deck)))) opponent tournament_state
 
 computer_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
 -- computer_play game current_result opponent tournament_state
@@ -59,7 +56,7 @@ computer_play game (EndOfGame 0) opponent (wins,losses,ties) =
       play game (game Start) opponent (wins,losses,ties+1)
       
 computer_play game result opponent tournament_state =
-      let ContinueGame state _ = result
+      let ContinueGame state = result
           opponent_move = opponent game result
         in
           do
@@ -67,5 +64,4 @@ computer_play game result opponent tournament_state =
             person_play game (game (Move opponent_move state)) opponent tournament_state
       
 
--- play magicsum (magicsum Start) simple_player (0,0,0)
--- play magicsum (magicsum Start) mm_player (0,0,0) -- minimax player
+-- play overunder (overunder Start) simple_player (0,0,0)
