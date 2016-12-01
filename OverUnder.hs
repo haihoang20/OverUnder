@@ -1,6 +1,8 @@
 -- CPSC 312 - 2016 - Games in Haskell
 module OverUnder where
 
+import System.Random
+
 -- To run it, try:
 -- ghci
 -- :load OverUnder
