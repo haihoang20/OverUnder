@@ -70,6 +70,13 @@ choose_card (h:t) = (h, t)
 getrandomelementfromlist :: [a] -> IO a
 getrandomelementfromlist xs = fmap (xs !!) $ randomRIO (0, length xs - 1)
 
+-- Remove element from list
+removeElem _ [] = []
+removeElem e (h:t)
+  | h==e = t
+  | otherwise = h:removeElem e t
+
+
 
 ------- A Player -------
 simple_player :: Player
