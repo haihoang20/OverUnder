@@ -7,8 +7,14 @@ module Play where
 
 import System.IO
 import OverUnder
+import qualified Data.Char as Char
 
 type TournammentState = (Int,Int,Int)   -- wins, losses, ties
+
+-- capitalizes the first letter, and puts the rest into lowercase
+capitalized :: String -> String
+capitalized (head:tail) = Char.toUpper head : map Char.toLower tail
+capitalized [] = []
 
 play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
 
@@ -39,9 +45,11 @@ person_play game (EndOfGame 0) opponent (wins,losses,ties) =
       play game (game Start) opponent (wins,losses,ties+1)
 person_play game (ContinueGame (s1, s2, (card, deck))) opponent tournament_state =
    do
-      putStrLn ("Previous card is "++show card++". Score is player: "++show s1++ ", computer: "++show s2++" Choose one of Over, Under, Same")
+      putStrLn ("The currently displayed card is "++show card++".")
+      putStrLn("Score is player: "++show s1++ ", computer: "++show s2) 
+      putStrLn("Choose one of Over, Under, Same")
       line <- getLine
-      computer_play game (game (Move (read line :: AMove) (s1, s2, (card, deck)))) opponent tournament_state
+      computer_play game (game (Move (read (capitalized line) :: AMove) (s1, s2, (card, deck)))) opponent tournament_state
 
 computer_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
 -- computer_play game current_result opponent tournament_state
@@ -55,12 +63,16 @@ computer_play game (EndOfGame 0) opponent (wins,losses,ties) =
       putStrLn "I't a draw"
       play game (game Start) opponent (wins,losses,ties+1)
       
-computer_play game result opponent tournament_state =
-      let ContinueGame state = result
+computer_play game (ContinueGame (s1, s2, (card, deck))) opponent tournament_state =
+
+      let result = (ContinueGame (s1, s2, (card, deck)))
+          ContinueGame state = result
           opponent_move = opponent game result
         in
           do
-            putStrLn ("The computer chose "++show opponent_move)
+            putStrLn ("Flipping next card... the card is "++show card)
+            putStrLn ("Computer's turn. The computer chose "++show opponent_move)
+            putStrLn ("Flipping card...")
             person_play game (game (Move opponent_move state)) opponent tournament_state
       
 
