@@ -83,6 +83,44 @@ simple_player :: Player
 simple_player _ (ContinueGame (_, _, (_, remaining))) = Over
 
 
+
+----------------------------------------------------------------------------------
+--------------------------------- Smart Computer ---------------------------------
+----------------------------------------------------------------------------------
+-- given a card and the remaining deck, this will return the next best choice
+-- where under=0, same=1, over=2
+bestchoice c d = 
+  calculatebestchoice 
+    (countcards (>) c d) 
+    (countcards (==) c d) 
+    (countcards (<) c d) 
+    (fromIntegral (length d))
+
+-- returns the number of cards counted based on an operator op, the current card to compare c,
+-- and the rest of the deck d
+-- example: countcards (<) 1 [1,2,3]
+countcards op c d = countcardshelper op c d 0
+
+countcardshelper _ _ [] n = n
+countcardshelper op c (h:t) n
+  | op c h = countcardshelper op c t (n+1)
+  | otherwise = countcardshelper op c t n
+
+-- determines the best choice (lower=0, same=1, higher=2) based on the number of cards that are
+-- stil in the deck that are lower than the current card l, the same as the current card s, 
+-- higher h, and the number of cards that remain in the deck c
+calculatebestchoice l s h c
+  | ((probability l c) >= (probability s c)) && ((probability l c) >= (probability h c)) = 0
+  | ((probability s c) >= (probability l c)) && ((probability s c) >= (probability h c)) = 1
+  | otherwise = 2
+
+probability numcardstocompare numcardsleftindeck = numcardstocompare / numcardsleftindeck
+--------------------------------------------------------------------------------------
+--------------------------------- End Smart Computer ---------------------------------
+--------------------------------------------------------------------------------------
+
+
+
 -- Test cases
 -- overunder Start
 -- overunder (Move 6 ([5,3],[2,7]))
