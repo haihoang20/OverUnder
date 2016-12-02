@@ -77,7 +77,7 @@ removeElem e (h:t)
 ------- A Player -------
 --TODO: select randomely!
 simple_player :: Player init
-simple_player _ (ContinueGame (_, _, (_, remaining), _)) = Over
+simple_player _ (ContinueGame (_, _, (_, remaining), (rh:rt))) = [Over, Under, Same] !! (rh `mod` 3)
 
 
 optimal_player :: Player init
