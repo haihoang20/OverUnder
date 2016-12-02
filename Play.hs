@@ -7,6 +7,7 @@ module Play where
 
 import System.IO
 import OverUnder
+import System.Random
 import qualified Data.Char as Char
 
 type TournammentState = (Int,Int,Int)   -- wins, losses, ties
@@ -74,5 +75,17 @@ computer_play game (ContinueGame (s1, s2, (card, deck), init)) opponent tourname
             putStrLn ("Computer's turn. The computer chose "++show opponent_move)
             putStrLn ("Flipping card...")
             person_play game (game (Move opponent_move state)) opponent tournament_state
-      
--- play overunder (overunder Start [1, 2, 3, 4, 5]) simple_player (0,0,0)
+
+playOU player = do
+  g <- getStdGen 
+  play overunder (overunder (Start (randoms g :: [Int]))) player (0,0,0)
+
+
+-- To play:
+-- playOU simple_player
+-- playOU optimal_player
+
+
+
+
+
