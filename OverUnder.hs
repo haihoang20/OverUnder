@@ -1,11 +1,6 @@
--- CPSC 312 - 2016 - Games in Haskell
 module OverUnder where
 
 import System.Random
-
--- To run it, try:
--- ghci
--- :load OverUnder
 
 data CardValue = Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King | Ace
   deriving (Eq,Ord,Enum,Bounded,Show,Read)
@@ -62,7 +57,6 @@ update_score Same previous current score
   | current == previous = score + 1
   | otherwise = score
 
--- TODO: make choose_card be random! for now just choosing the first card in the list!
 choose_card deck (rh:rt) = (x, (removeElem x deck))
   where
     x = deck !! (rh `mod` (length deck))
@@ -73,19 +67,17 @@ removeElem e (h:t)
   | h==e = t
   | otherwise = h:removeElem e t
 
-
-------- A Player -------
---TODO: select randomely!
+------- Simple Player - This player just choses randomely -------
 simple_player :: Player init
 simple_player _ (ContinueGame (_, _, (_, remaining), (rh:rt))) = [Over, Under, Same] !! (rh `mod` 3)
 
 
+------- Optimal Player - This player chooses based on calculating probability -------
 optimal_player :: Player init
 optimal_player _ (ContinueGame (_, _, (card, deck), _)) = bestchoice card deck
       
-
 ----------------------------------------------------------------------------------
---------------------------------- Smart Computer ---------------------------------
+--------------------------------- Smart Computer Calculator ----------------------
 ----------------------------------------------------------------------------------
 -- given a card and the remaining deck, this will return the next best choice
 bestchoice c d = 
@@ -114,11 +106,3 @@ calculatebestchoice l s h c
   | otherwise = Over
 
 probability numcardstocompare numcardsleftindeck = numcardstocompare / numcardsleftindeck
---------------------------------------------------------------------------------------
---------------------------------- End Smart Computer ---------------------------------
---------------------------------------------------------------------------------------
-
-
-
--- Test cases
--- overunder Start
