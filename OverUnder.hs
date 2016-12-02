@@ -20,33 +20,33 @@ data AMove = Over | Under | Same
 -- type AMove = Int                  -- a move for a player
 -- type State = ([AMove], [AMove])   -- (mine,other's)
 
-type State = (Score, Score, (CardValue, [CardValue])) -- my score, their score, previously chosen card value, remaining cards
+type State = (Score, Score, (CardValue, [CardValue]), [Int]) -- my score, their score, previously chosen card value, remaining cards, infinite list of random numbers
 
-data Action = Move AMove State   -- do AMove in State
-            | Start              -- returns starting state
+data Action init = Move AMove State   -- do AMove in State
+            | Start init             -- returns starting state
 
-data Result = EndOfGame Int        -- end of game
+data Result init = EndOfGame Int init    -- end of game
             | ContinueGame State   -- continue with new state
          deriving (Eq, Show)
 
-type Game = Action -> Result
+type Game init = Action init -> Result init
 
-type Player = Game -> Result -> AMove
+type Player init = Game init -> Result init -> AMove
 
 ------ The Over Under Game -------
-overunder :: Game
-overunder Start = ContinueGame (0, 0, (choose_card (allCardValues++allCardValues++allCardValues++allCardValues)))
-overunder (Move move (myscore, theirscore, (previous_card, the_deck)))
-    | length the_deck  == 0                 = EndOfGame 0      -- the deck is empty, draw
+overunder :: Game [Int]
+overunder (Start init) = ContinueGame (0, 0, (choose_card (allCardValues++allCardValues++allCardValues++allCardValues)), init)
+overunder (Move move (myscore, theirscore, (previous_card, the_deck), init))
+    | length the_deck  == 0                 = EndOfGame 0 init      -- the deck is empty, draw
     | otherwise =
-         overunder_helper (Move move (myscore, theirscore, (previous_card, new_deck))) chosen_card
+         overunder_helper (Move move (myscore, theirscore, (previous_card, new_deck), init)) chosen_card
          where
             (chosen_card, new_deck) = choose_card the_deck
 
-overunder_helper (Move move (myscore, theirscore, (previous_card, the_deck))) chosen_card
-    | new_score == 5                    = EndOfGame 1      -- agent wins
+overunder_helper (Move move (myscore, theirscore, (previous_card, the_deck), init)) chosen_card
+    | new_score == 5                    = EndOfGame 1 init      -- agent wins
     | otherwise                         =
-          ContinueGame (theirscore, new_score, (chosen_card, the_deck))
+          ContinueGame (theirscore, new_score, (chosen_card, the_deck), init)
           where 
               new_score = (update_score move previous_card chosen_card myscore)
 
@@ -77,18 +77,20 @@ removeElem e (h:t)
   | otherwise = h:removeElem e t
 
 
-
 ------- A Player -------
-simple_player :: Player
-simple_player _ (ContinueGame (_, _, (_, remaining))) = Over
+--TODO: select randomely!
+simple_player :: Player init
+simple_player _ (ContinueGame (_, _, (_, remaining), _)) = Over
 
 
+optimal_player :: Player init
+optimal_player _ (ContinueGame (_, _, (card, deck), _)) = bestchoice card deck
+      
 
 ----------------------------------------------------------------------------------
 --------------------------------- Smart Computer ---------------------------------
 ----------------------------------------------------------------------------------
 -- given a card and the remaining deck, this will return the next best choice
--- where under=0, same=1, over=2
 bestchoice c d = 
   calculatebestchoice 
     (countcards (>) c d) 
@@ -106,13 +108,13 @@ countcardshelper op c (h:t) n
   | op c h = countcardshelper op c t (n+1)
   | otherwise = countcardshelper op c t n
 
--- determines the best choice (lower=0, same=1, higher=2) based on the number of cards that are
+-- determines the best choice (Over, Under, or Same)  based on the number of cards that are
 -- stil in the deck that are lower than the current card l, the same as the current card s, 
 -- higher h, and the number of cards that remain in the deck c
 calculatebestchoice l s h c
-  | ((probability l c) >= (probability s c)) && ((probability l c) >= (probability h c)) = 0
-  | ((probability s c) >= (probability l c)) && ((probability s c) >= (probability h c)) = 1
-  | otherwise = 2
+  | ((probability l c) >= (probability s c)) && ((probability l c) >= (probability h c)) = Under
+  | ((probability s c) >= (probability l c)) && ((probability s c) >= (probability h c)) = Same
+  | otherwise = Over
 
 probability numcardstocompare numcardsleftindeck = numcardstocompare / numcardsleftindeck
 --------------------------------------------------------------------------------------
@@ -123,5 +125,3 @@ probability numcardstocompare numcardsleftindeck = numcardstocompare / numcardsl
 
 -- Test cases
 -- overunder Start
--- overunder (Move 6 ([5,3],[2,7]))
--- overunder (Move 3 ([5,7],[2,9]))

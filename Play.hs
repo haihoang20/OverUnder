@@ -16,7 +16,7 @@ capitalized :: String -> String
 capitalized (head:tail) = Char.toUpper head : map Char.toLower tail
 capitalized [] = []
 
-play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
+play :: Game init -> Result init -> Player init -> TournammentState -> IO TournammentState
 
 play game start opponent tournament_state =
   let (wins, losses,ties) = tournament_state in
@@ -33,39 +33,39 @@ play game start opponent tournament_state =
             else
                return tournament_state
 
-person_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
+person_play :: Game init -> Result init -> Player init -> TournammentState -> IO TournammentState
 -- opponent has played, the person must now play
-person_play game (EndOfGame 1) opponent (wins,losses,ties) =
+person_play game (EndOfGame 1 init) opponent (wins,losses,ties) =
    do
       putStrLn "Computer won!"
-      play game (game Start) opponent (wins,losses+1,ties)
-person_play game (EndOfGame 0) opponent (wins,losses,ties) =
+      play game (game (Start init)) opponent (wins,losses+1,ties)
+person_play game (EndOfGame 0 init) opponent (wins,losses,ties) =
    do
       putStrLn "I't a draw"
-      play game (game Start) opponent (wins,losses,ties+1)
-person_play game (ContinueGame (s1, s2, (card, deck))) opponent tournament_state =
+      play game (game (Start init)) opponent (wins,losses,ties+1)
+person_play game (ContinueGame (s1, s2, (card, deck), init)) opponent tournament_state =
    do
       putStrLn ("The currently displayed card is "++show card++".")
       putStrLn("Score is player: "++show s1++ ", computer: "++show s2) 
       putStrLn("Choose one of Over, Under, Same")
       line <- getLine
-      computer_play game (game (Move (read (capitalized line) :: AMove) (s1, s2, (card, deck)))) opponent tournament_state
+      computer_play game (game (Move (read (capitalized line) :: AMove) (s1, s2, (card, deck), init))) opponent tournament_state
 
-computer_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
+computer_play :: Game init -> Result init -> Player init -> TournammentState -> IO TournammentState
 -- computer_play game current_result opponent tournament_state
 -- person has played, the computer must now play
-computer_play game (EndOfGame 1) opponent (wins,losses,ties) =
+computer_play game (EndOfGame 1 init) opponent (wins,losses,ties) =
    do
       putStrLn "You won!"
-      play game (game Start) opponent (wins+1,losses,ties)
-computer_play game (EndOfGame 0) opponent (wins,losses,ties) =
+      play game (game (Start init)) opponent (wins+1,losses,ties)
+computer_play game (EndOfGame 0 init) opponent (wins,losses,ties) =
    do
       putStrLn "I't a draw"
-      play game (game Start) opponent (wins,losses,ties+1)
+      play game (game (Start init)) opponent (wins,losses,ties+1)
       
-computer_play game (ContinueGame (s1, s2, (card, deck))) opponent tournament_state =
+computer_play game (ContinueGame (s1, s2, (card, deck), init)) opponent tournament_state =
 
-      let result = (ContinueGame (s1, s2, (card, deck)))
+      let result = (ContinueGame (s1, s2, (card, deck), init))
           ContinueGame state = result
           opponent_move = opponent game result
         in
@@ -75,5 +75,4 @@ computer_play game (ContinueGame (s1, s2, (card, deck))) opponent tournament_sta
             putStrLn ("Flipping card...")
             person_play game (game (Move opponent_move state)) opponent tournament_state
       
-
--- play overunder (overunder Start) simple_player (0,0,0)
+-- play overunder (overunder Start [1, 2, 3, 4, 5]) simple_player (0,0,0)
