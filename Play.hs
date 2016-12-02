@@ -24,6 +24,7 @@ play game start opponent tournament_state =
    do
       putStrLn ("Tournament results: "++ show wins++ " wins "++show losses++" losses "++show ties++" ties")
       putStrLn "Who starts? 0=you, 1=computer, 2=exit."
+      putStrLn(" ")
       line <- getLine
       if (read line :: Int)==0
       then
@@ -39,10 +40,12 @@ person_play :: Game init -> Result init -> Player init -> TournammentState -> IO
 person_play game (EndOfGame 1 init) opponent (wins,losses,ties) =
    do
       putStrLn "Computer won!"
+      putStrLn(" ")
       play game (game (Start init)) opponent (wins,losses+1,ties)
 person_play game (EndOfGame 0 init) opponent (wins,losses,ties) =
    do
       putStrLn "I't a draw"
+      putStrLn(" ")
       play game (game (Start init)) opponent (wins,losses,ties+1)
 person_play game (ContinueGame (s1, s2, (card, deck), init)) opponent tournament_state =
    do
@@ -58,10 +61,12 @@ computer_play :: Game init -> Result init -> Player init -> TournammentState -> 
 computer_play game (EndOfGame 1 init) opponent (wins,losses,ties) =
    do
       putStrLn "You won!"
+      putStrLn(" ")
       play game (game (Start init)) opponent (wins+1,losses,ties)
 computer_play game (EndOfGame 0 init) opponent (wins,losses,ties) =
    do
       putStrLn "I't a draw"
+      putStrLn(" ")
       play game (game (Start init)) opponent (wins,losses,ties+1)
       
 computer_play game (ContinueGame (s1, s2, (card, deck), init)) opponent tournament_state =
@@ -71,9 +76,11 @@ computer_play game (ContinueGame (s1, s2, (card, deck), init)) opponent tourname
           opponent_move = opponent game result
         in
           do
+            putStrLn(" ")
             putStrLn ("Flipping next card... the card is "++show card)
-            putStrLn ("Computer's turn. The computer chose "++show opponent_move)
+            putStrLn ("**  Computer's turn. The computer chose "++show opponent_move)
             putStrLn ("Flipping card...")
+            putStrLn(" ")
             person_play game (game (Move opponent_move state)) opponent tournament_state
 
 playOU player = do
