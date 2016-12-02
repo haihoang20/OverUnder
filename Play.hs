@@ -24,7 +24,6 @@ play game start opponent tournament_state =
    do
       putStrLn ("Tournament results: "++ show wins++ " wins "++show losses++" losses "++show ties++" ties")
       putStrLn "Who starts? 0=you, 1=computer, 2=exit."
-      putStrLn(" ")
       line <- getLine
       if (read line :: Int)==0
       then
@@ -49,8 +48,11 @@ person_play game (EndOfGame 0 init) opponent (wins,losses,ties) =
       play game (game (Start init)) opponent (wins,losses,ties+1)
 person_play game (ContinueGame (s1, s2, (card, deck), init)) opponent tournament_state =
    do
+      putStrLn("--------------")
       putStrLn ("The currently displayed card is "++show card++".")
       putStrLn("Score is player: "++show s1++ ", computer: "++show s2) 
+      putStrLn(" ")
+      putStrLn("[YOUR TURN]")
       putStrLn("Choose one of Over, Under, Same")
       line <- getLine
       computer_play game (game (Move (read (capitalized line) :: AMove) (s1, s2, (card, deck), init))) opponent tournament_state
@@ -76,11 +78,13 @@ computer_play game (ContinueGame (s1, s2, (card, deck), init)) opponent tourname
           opponent_move = opponent game result
         in
           do
-            putStrLn(" ")
+            putStrLn("--------------")
             putStrLn ("Flipping next card... the card is "++show card)
-            putStrLn ("**  Computer's turn. The computer chose "++show opponent_move)
-            putStrLn ("Flipping card...")
             putStrLn(" ")
+            putStrLn("[COMPUTER'S TURN]")
+            putStrLn ("The computer chose "++show opponent_move)
+            putStrLn(" ")
+            putStrLn ("Flipping card...")
             person_play game (game (Move opponent_move state)) opponent tournament_state
 
 playOU player = do
