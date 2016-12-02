@@ -85,7 +85,3 @@ playOU player = do
 -- playOU simple_player
 -- playOU optimal_player
 
-
-
-
-

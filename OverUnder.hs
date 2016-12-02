@@ -63,12 +63,7 @@ update_score Same previous current score
   | otherwise = score
 
 -- TODO: make choose_card be random! for now just choosing the first card in the list!
--- USE THE BELOW FUNCTION (getrandomelementfromtlist)
 choose_card (h:t) = (h, t)
-
--- returns a random element from any list
-getrandomelementfromlist :: [a] -> IO a
-getrandomelementfromlist xs = fmap (xs !!) $ randomRIO (0, length xs - 1)
 
 -- Remove element from list
 removeElem _ [] = []
