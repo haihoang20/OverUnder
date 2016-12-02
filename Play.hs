@@ -75,4 +75,5 @@ computer_play game (ContinueGame (s1, s2, (card, deck), init)) opponent tourname
             putStrLn ("Flipping card...")
             person_play game (game (Move opponent_move state)) opponent tournament_state
       
+-- TODO: create a function to start the game, that wraps around the below commented out line.
 -- play overunder (overunder Start [1, 2, 3, 4, 5]) simple_player (0,0,0)
