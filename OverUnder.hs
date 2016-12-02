@@ -35,18 +35,18 @@ type Player init = Game init -> Result init -> AMove
 
 ------ The Over Under Game -------
 overunder :: Game [Int]
-overunder (Start init) = ContinueGame (0, 0, (choose_card (allCardValues++allCardValues++allCardValues++allCardValues)), init)
-overunder (Move move (myscore, theirscore, (previous_card, the_deck), init))
-    | length the_deck  == 0                 = EndOfGame 0 init      -- the deck is empty, draw
+overunder (Start (rh:rt)) = ContinueGame (0, 0, (choose_card (allCardValues++allCardValues++allCardValues++allCardValues) (rh:rt)), rt)
+overunder (Move move (myscore, theirscore, (previous_card, the_deck), (rh:rt)))
+    | length the_deck  == 0                 = EndOfGame 0 (rh:rt)      -- the deck is empty, draw
     | otherwise =
-         overunder_helper (Move move (myscore, theirscore, (previous_card, new_deck), init)) chosen_card
+         overunder_helper (Move move (myscore, theirscore, (previous_card, new_deck), (rh:rt))) chosen_card
          where
-            (chosen_card, new_deck) = choose_card the_deck
+           (chosen_card, new_deck) = choose_card the_deck (rh:rt)
 
-overunder_helper (Move move (myscore, theirscore, (previous_card, the_deck), init)) chosen_card
-    | new_score == 5                    = EndOfGame 1 init      -- agent wins
+overunder_helper (Move move (myscore, theirscore, (previous_card, the_deck), (rh:rt))) chosen_card
+    | new_score == 5                    = EndOfGame 1 (rh:rt)      -- agent wins
     | otherwise                         =
-          ContinueGame (theirscore, new_score, (chosen_card, the_deck), init)
+          ContinueGame (theirscore, new_score, (chosen_card, the_deck), rt)
           where 
               new_score = (update_score move previous_card chosen_card myscore)
 
@@ -63,7 +63,9 @@ update_score Same previous current score
   | otherwise = score
 
 -- TODO: make choose_card be random! for now just choosing the first card in the list!
-choose_card (h:t) = (h, t)
+choose_card deck (rh:rt) = (x, (removeElem x deck))
+  where
+    x = deck !! (rh `mod` (length deck))
 
 -- Remove element from list
 removeElem _ [] = []
