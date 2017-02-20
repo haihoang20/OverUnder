@@ -39,7 +39,7 @@ overunder (Move move (myscore, theirscore, (previous_card, the_deck), (rh:rt)))
            (chosen_card, new_deck) = choose_card the_deck (rh:rt)
 
 overunder_helper (Move move (myscore, theirscore, (previous_card, the_deck), (rh:rt))) chosen_card
-    | new_score == 5                    = EndOfGame 1 (rh:rt)      -- agent wins
+    | new_score == 15                   = EndOfGame 1 (rh:rt)      -- agent wins
     | otherwise                         =
           ContinueGame (theirscore, new_score, (chosen_card, the_deck), rt)
           where 
